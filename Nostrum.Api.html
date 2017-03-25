@@ -1,0 +1,4619 @@
+    <!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.15.0">
+    <title>Nostrum.Api – Elixir v0.2.1</title>
+    <link rel="stylesheet" href="dist/app-a07cea761b.css" />
+    
+    <script src="dist/sidebar_items-4afea0335f.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>if(localStorage.getItem('night-mode')) document.body.className += ' night-mode';</script>
+
+    <div class="main">
+<button class="sidebar-toggle">
+  <i class="icon-menu"></i>
+</button>
+<section class="sidebar">
+
+  
+  <a href="intro.html" class="sidebar-projectLink">
+    <div class="sidebar-projectDetails">
+      <h1 class="sidebar-projectName">
+        Elixir
+      </h1>
+      <h2 class="sidebar-projectVersion">
+        v0.2.1
+      </h2>
+    </div>
+    
+  </a>
+
+  <div class="sidebar-search">
+    <i class="icon-search"></i>
+    <input type="text" class="sidebar-searchInput" placeholder="search" autocomplete="off" />
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+    
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+    
+
+    
+      <li><a id="exceptions-list" href="#full-list">Exceptions</a></li>
+    
+
+    
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+
+      <h1>
+        <small class="visible-xs">Elixir v0.2.1</small>
+        Nostrum.Api
+        
+        
+          <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1" title="View Source" class="view-source" rel="help">
+            <i class="icon-code"></i>
+          </a>
+        
+      </h1>
+
+      
+        <section id="moduledoc">
+          <p>Interface for Discord’s rest API.</p>
+<p>By default all methods in this module are ran synchronously. If you wish to
+have async rest operations I recommend you execute these functions inside of a
+task.</p>
+<p><strong>Examples</strong></p>
+<pre><code class="Elixir"># Async Task
+t = Task.async fn -&gt;
+  Nostrum.Api.get_channel_messages(12345678912345, :infinity, {})
+end
+messages = Task.await t
+
+# A lot of times we don&#39;t care about the return value of the function
+Task.start fn -&gt;
+  messages = [&quot;in&quot;, &quot;the&quot;, &quot;end&quot;, &quot;it&quot;, &quot;doesn&#39;t&quot;, &quot;even&quot;, &quot;matter&quot;]
+  Enum.each messages, &amp;Nostrum.Api.create_message!(12345678912345, &amp;1)
+end</code></pre>
+<h4>A note about Strings and Ints</h4>
+<p>Currently, responses from the REST api will have <code class="inline">id</code> fields as <code class="inline">string</code>.
+Everything received from the WS connection will have <code class="inline">id</code> fields as <code class="inline">int</code>.</p>
+<p>If you’re processing a response from the API and trying to access something in the cache
+based off of an <code class="inline">id</code> in the response, you will need to conver it to an <code class="inline">int</code> using
+<a href="https://hexdocs.pm/elixir/String.html#to_integer/1"><code class="inline">String.to_integer/1</code></a>. I’m open to suggestions for how this should be handled going forward.</p>
+<p><strong>Example</strong></p>
+<pre><code class="Elixir">messages = Nostrum.Api.get_pinned_messages!(12345678912345)
+
+authors =
+  Enum.map messages, fn msg -&gt;
+    author_id = String.to_integer(msg.author.id)
+    Nostrum.Cache.User.get!(id: author_id)
+  end</code></pre>
+
+        </section>
+      
+
+      
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <i class="icon-link"></i>
+            </a>
+            Summary
+          </h1>
+          
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+    <div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:error/0">error()</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Represents a failed response from the API</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:limit/0">limit()</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Represents a limit used to retrieve messages</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:locator/0">locator()</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Represents a tuple used to locate messages</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:message_content/0">message_content()</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Represents a message’s content in the context of creating a message using the Api</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:status/0">status()</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Represents different statuses the bot can have</p>
+</div>
+  
+</div>
+
+  </div>
+
+
+          
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+    <div class="summary-row">
+  <div class="summary-signature">
+    <a href="#accept_invite/1">accept_invite(invite_code)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Accepts an invite</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#add_guild_member_role/3">add_guild_member_role(guild_id, user_id, role_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Adds a role to a member</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#add_member/3">add_member(guild_id, user_id, options)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Adds a member to a guild</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#add_pinned_message/2">add_pinned_message(channel_id, message_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Pins a message</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#add_pinned_message!/2">add_pinned_message!(channel_id, message_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Pins a message</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#begin_guild_prune/2">begin_guild_prune(guild_id, days)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Begins a guild prune</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#bulk_delete_messages/3">bulk_delete_messages(channel_id, messages, filter \\ true)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Deletes multiple messages from a channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#bulk_delete_messages!/3">bulk_delete_messages!(channel_id, messages, filter \\ true)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Deletes multiple messages from a channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_channel/2">create_channel(guild_id, options)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Creates a channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_channel_invite/2">create_channel_invite(channel_id, options \\ %{})</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Creates an invite for a channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_dm/1">create_dm(user_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Creates a new DM channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_group_dm/2">create_group_dm(access_tokens, nicks)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Creates a new group DM channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_guild_ban/3">create_guild_ban(guild_id, user_id, days_to_delete)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Bans a user from a guild</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_guild_integrations/2">create_guild_integrations(guild_id, options)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Creates a new guild integeration</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_guild_role/2">create_guild_role(guild_id, options)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Creates a guild role</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_message/3">create_message(channel_id, content, tts \\ false)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Send a message to a channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_message!/3">create_message!(channel_id, content, tts \\ false)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Send a message to a channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_reaction/3">create_reaction(channel_id, message_id, emoji)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Create a rection for a message</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_webhook/2">create_webhook(channel_id, args)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Creates a webhook</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_all_reactions/2">delete_all_reactions(channel_id, message_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Deletes all reactions from a message</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_channel/1">delete_channel(channel_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Delete a channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_channel!/1">delete_channel!(channel_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Delete a channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_channel_permissions/2">delete_channel_permissions(channel_id, overwrite_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Delete a channel permission for a user or role</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_guild/1">delete_guild(guild_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Deletes a guild</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_guild_integrations/2">delete_guild_integrations(guild_id, integration_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Deletes a guild integeration</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_guild_role/2">delete_guild_role(guild_id, role_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Deletes a guild role</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_invite/1">delete_invite(invite_code)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Deletes an invite</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_message/1">delete_message(message)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Delete a message</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_message/2">delete_message(channel_id, message_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Delete a message</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_message!/1">delete_message!(message)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Delete a message</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_message!/2">delete_message!(channel_id, message_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Delete a message</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_own_reaction/3">delete_own_reaction(channel_id, message_id, emoji)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Deletes a rection made by the user</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_pinned_message/2">delete_pinned_message(channel_id, message_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Unpins a message</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_pinned_message!/2">delete_pinned_message!(channel_id, message_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Unpins a message</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_reaction/4">delete_reaction(channel_id, message_id, emoji, user_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Deletes a rection from a message</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_webhook/1">delete_webhook(webhook_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Deletes a webhook</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#edit_channel/2">edit_channel(channel_id, options)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Edit a channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#edit_channel!/2">edit_channel!(channel_id, options)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Edit a channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#edit_channel_permissions/3">edit_channel_permissions(channel_id, overwrite_id, permission_info)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Edit the permission overwrites for a user or role</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#edit_channel_permissions!/3">edit_channel_permissions!(channel_id, overwrite_id, permission_info)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Edit the permission overwrites for a user or role</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#edit_guild/2">edit_guild(guild_id, options)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Modify a guild’s settings</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#edit_message/2">edit_message(message, content)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Edit a message</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#edit_message/3">edit_message(channel_id, message_id, content)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Edit a message</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#edit_message!/2">edit_message!(message, content)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Edit a message</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#edit_message!/3">edit_message!(channel_id, message_id, content)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Edit a message</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#execute_git_webhook/3">execute_git_webhook(webhook_id, webhook_token, wait \\ false)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Executes a git webhook</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#execute_slack_webhook/3">execute_slack_webhook(webhook_id, webhook_token, wait \\ false)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Executes a slack webhook</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#execute_webhook/4">execute_webhook(webhook_id, webhook_token, args, wait \\ false)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Executes a webhook</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_channel/1">get_channel(channel_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Get a channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_channel!/1">get_channel!(channel_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Get a channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_channel_invites/1">get_channel_invites(channel_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a list of invites for a channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_channel_message/2">get_channel_message(channel_id, message_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Retrieves a message from a channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_channel_message!/2">get_channel_message!(channel_id, message_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Retrieves a message from a channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_channel_messages/3">get_channel_messages(channel_id, limit, locator \\ {})</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Retrieve messages from a channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_channel_messages!/3">get_channel_messages!(channel_id, limit, locator)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Retrieve messages from a channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_channel_webhooks/1">get_channel_webhooks(channel_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a list of webook for a channel</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_channels/1">get_channels(guild_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a list of channels</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_current_user/0">get_current_user()</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets info on the current user</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_current_users_guilds/1">get_current_users_guilds(options)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a list of guilds the user is currently in</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_guild/1">get_guild(guild_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a guild using the REST api</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_guild!/1">get_guild!(guild_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a guild using the REST api</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_guild_bans/1">get_guild_bans(guild_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a list of users banend from a guild</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_guild_embed/1">get_guild_embed(guild_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a guild embed</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_guild_integrations/1">get_guild_integrations(guild_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a list of guild integerations</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_guild_invites/1">get_guild_invites(guild_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a list of invites for a guild</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_guild_members/2">get_guild_members(guild_id, options)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a list of guild members</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_guild_prune/2">get_guild_prune(guild_id, options)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets the number of members that would be removed in a prune</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_guild_roles/1">get_guild_roles(guild_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a guild’s roles</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_guild_webhooks/1">get_guild_webhooks(guild_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a list of webooks for a guild</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_invite/1">get_invite(invite_code)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets an invite</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_member/2">get_member(guild_id, user_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a guild member</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_pinned_messages/1">get_pinned_messages(channel_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets all pinned messages</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_pinned_messages!/1">get_pinned_messages!(channel_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets all pinned messages</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_reactions/3">get_reactions(channel_id, message_id, emoji)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets all users who reacted with an emoji</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_token/0">get_token()</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Returns the token of the bot</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_user/1">get_user(user_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a user</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_user_connections/0">get_user_connections()</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a list of user connections</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_user_dms/0">get_user_dms()</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a list of user DM channels</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_voice_region/1">get_voice_region(guild_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a list of voice regions for the guild</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_webhook/1">get_webhook(webhook_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a webhook by id</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_webhook_with_token/2">get_webhook_with_token(webhook_id, webhook_token)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a webhook by id and token</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#leave_guild/1">leave_guild(guild_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Leaves a guild</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_voice_regions/0">list_voice_regions()</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Gets a list of voice regions</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#modify_channel_position/2">modify_channel_position(guild_id, options)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Reorders a guild’s channels</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#modify_current_user/1">modify_current_user(options)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Changes the username or avatar of the current user</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#modify_guild_embed/2">modify_guild_embed(guild_id, options)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Modifies a guild imbed</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#modify_guild_integrations/3">modify_guild_integrations(guild_id, integration_id, options)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Changes the settings and behaviours for a guild integeration</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#modify_guild_role/3">modify_guild_role(guild_id, role_id, options)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Modifies a guild role</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#modify_guild_role_positions/2">modify_guild_role_positions(guild_id, options)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Reorders a guild’s roles</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#modify_member/3">modify_member(guild_id, user_id, options)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Modifies a guild member</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#modify_webhook/2">modify_webhook(webhook_id, args)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Modifies a webhook</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#modify_webhook_with_token/3">modify_webhook_with_token(webhook_id, webhook_token, args)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Modifies a webhook with a token</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#remove_guild_ban/2">remove_guild_ban(guild_id, user_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Removes a ban for a user</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#remove_guild_member_role/3">remove_guild_member_role(guild_id, user_id, role_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Removes a role from a member</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#remove_member/2">remove_member(guild_id, user_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Removes a memeber from a guild</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#request/4">request(method, route, body \\ &quot;&quot;, options \\ [])</a>
+  </div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#request_multipart/4">request_multipart(method, route, body \\ &quot;&quot;, options \\ [])</a>
+  </div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_typing/1">start_typing(channel_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Triggers the typing indicator</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_typing!/1">start_typing!(channel_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Triggers the typing indicator</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sync_guild_integrations/2">sync_guild_integrations(guild_id, integration_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Syncs a guild integration</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_status/2">update_status(status, game)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Updates the status of the bot for all shards</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_status/3">update_status(pid, status, game)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Updates the status of the bot for a certain shard</p>
+</div>
+  
+</div>
+
+  </div>
+
+
+          
+
+        </section>
+      
+
+      
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <i class="icon-link"></i>
+            </a>
+            Types
+          </h1>
+          <div class="types-list">
+            <div class="detail" id="t:error/0">
+  
+  <div class="detail-header">
+    <a href="#t:error/0" class="detail-link" title="Link to this type">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">error()</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L64" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>error() :: {:error, <a href="Nostrum.Error.ApiError.html#t:t/0">Nostrum.Error.ApiError.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Represents a failed response from the API.</p>
+<p>This occurs when hackney or HTTPoison fail, or when the API doesn’t respond with <code class="inline">200</code> or <code class="inline">204</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="t:limit/0">
+  
+  <div class="detail-header">
+    <a href="#t:limit/0" class="detail-link" title="Link to this type">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">limit()</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L71" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>limit() :: integer | :infinity</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Represents a limit used to retrieve messages.</p>
+<p>Integer number of messages, or :infinity to retrieve all messages.</p>
+
+  </section>
+</div>
+<div class="detail" id="t:locator/0">
+  
+  <div class="detail-header">
+    <a href="#t:locator/0" class="detail-link" title="Link to this type">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">locator()</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L80" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre><a href="#t:locator/0">locator</a> ::
+  {:before, integer} |
+  {:after, integer} |
+  {:around, integer} |
+  {}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Represents a tuple used to locate messages.</p>
+<p>The first element of the tuple is an atom.
+The second element will be a message_id as an integer.
+The tuple can also be empty to search from the most recent message in the channel</p>
+
+  </section>
+</div>
+<div class="detail" id="t:message_content/0">
+  
+  <div class="detail-header">
+    <a href="#t:message_content/0" class="detail-link" title="Link to this type">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">message_content()</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L55" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre><a href="#t:message_content/0">message_content</a> ::
+  <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a> |
+  [content: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, embed: <a href="Nostrum.Struct.Embed.html#t:t/0">Nostrum.Struct.Embed.t</a>] |
+  [content: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, file: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>]</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Represents a message’s content in the context of creating a message using the Api.</p>
+
+  </section>
+</div>
+<div class="detail" id="t:status/0">
+  
+  <div class="detail-header">
+    <a href="#t:status/0" class="detail-link" title="Link to this type">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">status()</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L90" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>status() :: :dnd | :idle | :online | :invisible</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Represents different statuses the bot can have.</p>
+<ul>
+<li><code class="inline">:dnd</code> - Red circle.
+</li>
+<li><code class="inline">:idle</code> - Yellow circle.
+</li>
+<li><code class="inline">:online</code> - Green circle.
+</li>
+<li><code class="inline">:invisible</code> - The bot will appear offline.
+</li>
+</ul>
+
+  </section>
+</div>
+
+          </div>
+        </section>
+      
+
+      
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <i class="icon-link"></i>
+            </a>
+            Functions
+          </h1>
+          <div class="detail" id="accept_invite/1">
+  
+  <div class="detail-header">
+    <a href="#accept_invite/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">accept_invite(invite_code)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1357" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>accept_invite(integer) :: <a href="#t:error/0">error</a> | {:ok, <a href="Nostrum.Struct.Invite.html#t:t/0">Nostrum.Struct.Invite.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Accepts an invite.</p>
+<p>Not available to bot accounts. Invite to accept is specified by <code class="inline">invite_code</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="add_guild_member_role/3">
+  
+  <div class="detail-header">
+    <a href="#add_guild_member_role/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">add_guild_member_role(guild_id, user_id, role_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1004" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>add_guild_member_role(integer, integer, integer) ::
+  <a href="#t:error/0">error</a> |
+  {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Adds a role to a member.</p>
+<p>Role to add is specified by <code class="inline">role_id</code>.
+User to add role to is specified by <code class="inline">guild_id</code> and <code class="inline">user_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="add_member/3">
+  
+  <div class="detail-header">
+    <a href="#add_member/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">add_member(guild_id, user_id, options)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L965" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>add_member(integer, integer, %{nick: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, roles: [integer], mute: boolean, deaf: boolean, channel_id: integer}) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Guild.Member.html#t:t/0">Nostrum.Struct.Guild.Member.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Adds a member to a guild.</p>
+<p>Member to add is specified by <code class="inline">guild_id</code> and <code class="inline">user_id</code></p>
+<p><code class="inline">options</code> is a map with the following option keys:</p>
+<ul>
+<li><code class="inline">nick</code> - Users nickname.
+</li>
+<li><code class="inline">roles</code> - Array of roles to give member.
+</li>
+<li><code class="inline">mute</code> - If the user should be muted.
+</li>
+<li><code class="inline">deaf</code> - If the user should be deafaned.
+</li>
+<li><code class="inline">channel_id</code> - Id of the channel to move the user to.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="add_pinned_message/2">
+  
+  <div class="detail-header">
+    <a href="#add_pinned_message/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">add_pinned_message(channel_id, message_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L725" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>add_pinned_message(integer, integer) :: <a href="#t:error/0">error</a> | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Pins a message.</p>
+<p>Pins the message specified by <code class="inline">message_id</code> in the channel specified by <code class="inline">channel_id</code>.</p>
+<p>Returns <code class="inline">{:ok}</code> if successful. <code class="inline">error</code> otherwise.</p>
+
+  </section>
+</div>
+<div class="detail" id="add_pinned_message!/2">
+  
+  <div class="detail-header">
+    <a href="#add_pinned_message!/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">add_pinned_message!(channel_id, message_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L738" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>add_pinned_message!(integer, integer) :: no_return | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Pins a message.</p>
+<p>Pins the message specified by <code class="inline">message_id</code> in the channel specified by <code class="inline">channel_id</code>.</p>
+<p>Raises <a href="Nostrum.Error.ApiError.html"><code class="inline">Nostrum.Error.ApiError</code></a> if error occurs while making the rest call.
+Returns {:ok} if successful.</p>
+
+  </section>
+</div>
+<div class="detail" id="begin_guild_prune/2">
+  
+  <div class="detail-header">
+    <a href="#begin_guild_prune/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">begin_guild_prune(guild_id, days)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1190" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>begin_guild_prune(integer, integer) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, %{pruned: integer}}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Begins a guild prune.</p>
+<p>Guild to number is specified by guild_id.
+Days is that number of days to count prune for.</p>
+
+  </section>
+</div>
+<div class="detail" id="bulk_delete_messages/3">
+  
+    <span id="bulk_delete_messages/2" />
+  
+  <div class="detail-header">
+    <a href="#bulk_delete_messages/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">bulk_delete_messages(channel_id, messages, filter \\ true)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L546" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>bulk_delete_messages(integer, [<a href="Nostrum.Struct.Message.html#t:id/0">Nostrum.Struct.Message.id</a>], boolean) ::
+  <a href="#t:error/0">error</a> |
+  {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Deletes multiple messages from a channel.</p>
+<p><code class="inline">messages</code> is a list of <code class="inline">Nostrum.Struct.Message.id</code> that you wish to delete.</p>
+<p>This method can only delete messages sent within the last two weeks.
+<code class="inline">Filter</code> is an optional parameter that specifies whether messages sent over
+two weeks ago should be filtered out; defaults to <code class="inline">true</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="bulk_delete_messages!/3">
+  
+    <span id="bulk_delete_messages!/2" />
+  
+  <div class="detail-header">
+    <a href="#bulk_delete_messages!/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">bulk_delete_messages!(channel_id, messages, filter \\ true)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L568" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>bulk_delete_messages!(integer, [<a href="Nostrum.Struct.Message.html#t:id/0">Nostrum.Struct.Message.id</a>], boolean) ::
+  no_return |
+  {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Deletes multiple messages from a channel.</p>
+<p>See <a href="#bulk_delete_messages/2"><code class="inline">bulk_delete_messages/2</code></a> for more info.</p>
+<p>Raises <a href="Nostrum.Error.ApiError.html"><code class="inline">Nostrum.Error.ApiError</code></a> if error occurs while making the rest call.</p>
+
+  </section>
+</div>
+<div class="detail" id="create_channel/2">
+  
+  <div class="detail-header">
+    <a href="#create_channel/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">create_channel(guild_id, options)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L878" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>create_channel(integer, %{name: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, type: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, bitrate: integer, user_limit: integer, permission_overwrites: [<a href="Nostrum.Struct.Overwrite.html#t:t/0">Nostrum.Struct.Overwrite.t</a>]}) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Channel.html#t:t/0">Nostrum.Struct.Channel.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Creates a channel.</p>
+<p>Guild to create channel in is specifed by <code class="inline">guild_id</code>.</p>
+<p><code class="inline">options</code> is a map with the following optional keys (except for name):</p>
+<ul>
+<li><code class="inline">name</code> - Channel name.
+</li>
+<li><code class="inline">type</code> - Channel type.
+</li>
+<li><code class="inline">bitrate</code> - Bitrate if creating voice channel.
+</li>
+<li><code class="inline">user_limit</code> - User limit if creating voice channel.
+</li>
+<li><code class="inline">permission_overwrites</code> - Array of permission overwrites.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="create_channel_invite/2">
+  
+    <span id="create_channel_invite/1" />
+  
+  <div class="detail-header">
+    <a href="#create_channel_invite/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">create_channel_invite(channel_id, options \\ %{})</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L649" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>create_channel_invite(integer, max_age: integer, max_uses: integer, temporary: boolean, unique: boolean) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Invite.html#t:t/0">Nostrum.Struct.Invite.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Creates an invite for a channel.</p>
+<p><code class="inline">options</code> is a kwl with the following optional keys:</p>
+<ul>
+<li><code class="inline">max_age</code> - Duration of invite in seconds before expiry, or 0 for never
+</li>
+<li><code class="inline">max_uses</code> - Max number of uses or 0 for unlimited.
+</li>
+<li><code class="inline">temporary</code> - Whether the invite should grant temporary membership.
+</li>
+<li><code class="inline">unique</code> - Used when creating unique one time use invites.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="create_dm/1">
+  
+  <div class="detail-header">
+    <a href="#create_dm/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">create_dm(user_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1457" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>create_dm(integer) :: <a href="#t:error/0">error</a> | {:ok, <a href="Nostrum.Struct.DMChannel.html#t:t/0">Nostrum.Struct.DMChannel.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Creates a new DM channel.</p>
+<p>Opens a DM channel with the user specified by <code class="inline">user_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="create_group_dm/2">
+  
+  <div class="detail-header">
+    <a href="#create_group_dm/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">create_group_dm(access_tokens, nicks)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1470" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>create_group_dm([<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>], map) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.DMChannel.html#t:t/0">Nostrum.Struct.DMChannel.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Creates a new group DM channel.</p>
+
+  </section>
+</div>
+<div class="detail" id="create_guild_ban/3">
+  
+  <div class="detail-header">
+    <a href="#create_guild_ban/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">create_guild_ban(guild_id, user_id, days_to_delete)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1050" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>create_guild_ban(integer, integer, integer) :: <a href="#t:error/0">error</a> | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Bans a user from a guild.</p>
+<p>User to delete is specified by <code class="inline">guild_id</code> and <code class="inline">user_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="create_guild_integrations/2">
+  
+  <div class="detail-header">
+    <a href="#create_guild_integrations/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">create_guild_integrations(guild_id, options)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1257" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>create_guild_integrations(integer, %{type: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, id: integer}) ::
+  <a href="#t:error/0">error</a> |
+  {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Creates a new guild integeration.</p>
+<p>Guild to create integration with is specified by <code class="inline">guild_id</code>.</p>
+<p><code class="inline">options</code> is a map with the following requires keys:</p>
+<ul>
+<li><code class="inline">type</code> - Integration type.
+</li>
+<li><code class="inline">id</code> - Integeration id.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="create_guild_role/2">
+  
+  <div class="detail-header">
+    <a href="#create_guild_role/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">create_guild_role(guild_id, options)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1098" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>create_guild_role(integer, name: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, permissions: integer, color: integer, hoist: boolean, mentionable: boolean) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Guild.Role.html#t:t/0">Nostrum.Struct.Guild.Role.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Creates a guild role.</p>
+<p>Guild to create guild for is specified by <code class="inline">guild_id</code>.</p>
+<p><code class="inline">options</code> is a map with the following optional keys:</p>
+<ul>
+<li><code class="inline">name</code> - Name of the role.
+</li>
+<li><code class="inline">permissions</code> - Bitwise of the enabled/disabled permissions.
+</li>
+<li><code class="inline">color</code> - RGB color value.
+</li>
+<li><code class="inline">hoist</code> - Whether the role should be displayed seperately in the sidebar.
+</li>
+<li><code class="inline">mentionable</code> - Whether the role should be mentionable.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="create_message/3">
+  
+    <span id="create_message/2" />
+  
+  <div class="detail-header">
+    <a href="#create_message/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">create_message(channel_id, content, tts \\ false)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L134" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>create_message(<a href="Nostrum.Struct.Message.html#t:t/0">Nostrum.Struct.Message.t</a>, <a href="#t:message_content/0">message_content</a>, boolean) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Message.html#t:t/0">Nostrum.Struct.Message.t</a>}</pre>
+        
+          <pre>create_message(<a href="Nostrum.Struct.Guild.TextChannel.html#t:id/0">Nostrum.Struct.Guild.TextChannel.id</a>, <a href="#t:message_content/0">message_content</a>, boolean) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Message.html#t:t/0">Nostrum.Struct.Message.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Send a message to a channel.</p>
+<h2 id="create_message/3-parameters" class="section-heading">
+  <a href="#create_message/3-parameters" class="hover-link"><i class="icon-link"></i></a>
+  Parameters
+</h2>
+
+<ul>
+<li><code class="inline">channel_id</code> - Id of the channel to send the message to.
+</li>
+<li><code class="inline">content</code> - One of string, embed, or file to send to the channel.
+  See <a href="#t:message_content/0"><code class="inline">message_content/0</code></a> for more info.
+</li>
+<li><code class="inline">tts</code> - Whether the message should be read over text to speech.
+</li>
+</ul>
+<p>For the <code class="inline">channel_id</code> parameter, you can pass in a <a href="Nostrum.Struct.Message.html"><code class="inline">Nostrum.Struct.Message</code></a>
+struct, and it will pull the id from there.</p>
+<h2 id="create_message/3-example" class="section-heading">
+  <a href="#create_message/3-example" class="hover-link"><i class="icon-link"></i></a>
+  Example
+</h2>
+
+<pre><code class="Elixir">Nostrum.Api.create_message(1111111111111, [content: &quot;my os rules&quot;, file: ~S&quot;C:\i\use\windows&quot;])</code></pre>
+
+  </section>
+</div>
+<div class="detail" id="create_message!/3">
+  
+    <span id="create_message!/2" />
+  
+  <div class="detail-header">
+    <a href="#create_message!/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">create_message!(channel_id, content, tts \\ false)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L165" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>create_message!(<a href="Nostrum.Struct.Guild.TextChannel.html#t:id/0">Nostrum.Struct.Guild.TextChannel.id</a>, <a href="#t:message_content/0">message_content</a>, boolean) ::
+  no_return |
+  <a href="Nostrum.Struct.Message.html#t:t/0">Nostrum.Struct.Message.t</a></pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Send a message to a channel.</p>
+<p>See <a href="#create_message/3"><code class="inline">create_message/3</code></a> for usage.</p>
+<p>Raises <a href="Nostrum.Error.ApiError.html"><code class="inline">Nostrum.Error.ApiError</code></a> if error occurs while making the rest call.</p>
+
+  </section>
+</div>
+<div class="detail" id="create_reaction/3">
+  
+  <div class="detail-header">
+    <a href="#create_reaction/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">create_reaction(channel_id, message_id, emoji)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L287" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>create_reaction(integer, integer, <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a> | <a href="Nostrum.Struct.Emoji.html#t:custom_emoji/0">Nostrum.Struct.Emoji.custom_emoji</a>) ::
+  <a href="#t:error/0">error</a> |
+  {:ok}</pre>
+        
+          <pre>create_reaction(integer, integer, <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a> | <a href="Nostrum.Struct.Emoji.html#t:custom_emoji/0">Nostrum.Struct.Emoji.custom_emoji</a>) ::
+  <a href="#t:error/0">error</a> |
+  {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Create a rection for a message.</p>
+<p>Creates a reaction using an <code class="inline">emoji</code> for the message specified by <code class="inline">message_id</code> and
+<code class="inline">channel_id</code>. <code class="inline">emoji</code> can be a <code class="inline">Nostrum.Struct.Emoji.custom_emoji.t</code>, a
+base 16 unicode emoji string, or a uri encoded string.</p>
+<p><strong>Example</strong></p>
+<pre><code class="Elixir">Nostrum.Api.create_reaction(123123123123, 321321321321, &quot;\xF0\x9F\x98\x81&quot;)
+Nostrum.Api.create_reaction(123123123123, 321321321321, URI.encode(&quot;\u2b50&quot;))</code></pre>
+<p>Returns <code class="inline">{:ok}</code> if successful, <code class="inline">{:error, reason}</code> otherwise.</p>
+
+  </section>
+</div>
+<div class="detail" id="create_webhook/2">
+  
+  <div class="detail-header">
+    <a href="#create_webhook/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">create_webhook(channel_id, args)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1518" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>create_webhook(<a href="Nostrum.Struct.Guild.TextChannel.html#t:id/0">Nostrum.Struct.Guild.TextChannel.id</a>, %{name: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, avatar: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>}) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Webhook.html#t:t/0">Nostrum.Struct.Webhook.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Creates a webhook.</p>
+<h2 id="create_webhook/2-parameters" class="section-heading">
+  <a href="#create_webhook/2-parameters" class="hover-link"><i class="icon-link"></i></a>
+  Parameters
+</h2>
+
+<ul>
+<li><code class="inline">channel_id</code> - Id of the channel to send the message to.
+</li>
+<li><p><code class="inline">args</code> - Map with the following <strong>required</strong> keys:</p>
+<ul>
+<li><code class="inline">name</code> - Name of the webhook.
+</li>
+<li><code class="inline">avatar</code> - Base64 128x128 jpeg image for the default avatar.
+</li>
+</ul>
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="delete_all_reactions/2">
+  
+  <div class="detail-header">
+    <a href="#delete_all_reactions/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">delete_all_reactions(channel_id, message_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L343" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete_all_reactions(integer, integer) :: <a href="#t:error/0">error</a> | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Deletes all reactions from a message.</p>
+<p>Reaction to delete is specified by
+<code class="inline">channel_id</code>, <code class="inline">message_id</code>, and <code class="inline">emoji</code>.</p>
+<p>Returns <code class="inline">{:ok}</code> if successful, <code class="inline">{:error, reason}</code> otherwise.</p>
+
+  </section>
+</div>
+<div class="detail" id="delete_channel/1">
+  
+  <div class="detail-header">
+    <a href="#delete_channel/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">delete_channel(channel_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L428" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete_channel(integer) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Channel.html#t:t/0">Nostrum.Struct.Channel.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Delete a channel.</p>
+<p>Channel to delete is specified by <code class="inline">channel_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="delete_channel!/1">
+  
+  <div class="detail-header">
+    <a href="#delete_channel!/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">delete_channel!(channel_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L443" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete_channel!(integer) :: no_return | <a href="Nostrum.Struct.Channel.html#t:t/0">Nostrum.Struct.Channel.t</a></pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Delete a channel.</p>
+<p>Raises <a href="Nostrum.Error.ApiError.html"><code class="inline">Nostrum.Error.ApiError</code></a> if error occurs while making the rest call.</p>
+
+  </section>
+</div>
+<div class="detail" id="delete_channel_permissions/2">
+  
+  <div class="detail-header">
+    <a href="#delete_channel_permissions/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">delete_channel_permissions(channel_id, overwrite_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L615" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete_channel_permissions(integer, integer) :: <a href="#t:error/0">error</a> | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Delete a channel permission for a user or role.</p>
+<p>Role or user overwrite to delete is specified by <code class="inline">channel_id</code> and <code class="inline">overwrite_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="delete_guild/1">
+  
+  <div class="detail-header">
+    <a href="#delete_guild/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">delete_guild(guild_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L840" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete_guild(integer) :: <a href="#t:error/0">error</a> | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Deletes a guild.</p>
+<p>Guild to delete specified by <code class="inline">guild_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="delete_guild_integrations/2">
+  
+  <div class="detail-header">
+    <a href="#delete_guild_integrations/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">delete_guild_integrations(guild_id, integration_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1286" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete_guild_integrations(integer, integer) :: <a href="#t:error/0">error</a> | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Deletes a guild integeration.</p>
+<p>Integration to delete is specified by <code class="inline">guild_id</code> and <code class="inline">integeration_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="delete_guild_role/2">
+  
+  <div class="detail-header">
+    <a href="#delete_guild_role/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">delete_guild_role(guild_id, role_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1163" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete_guild_role(integer, integer) :: <a href="#t:error/0">error</a> | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Deletes a guild role.</p>
+<p>Role to delte is specified by <code class="inline">guild_id</code> and <code class="inline">role_id</code></p>
+
+  </section>
+</div>
+<div class="detail" id="delete_invite/1">
+  
+  <div class="detail-header">
+    <a href="#delete_invite/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">delete_invite(invite_code)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1342" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete_invite(integer) :: <a href="#t:error/0">error</a> | {:ok, <a href="Nostrum.Struct.Invite.html#t:t/0">Nostrum.Struct.Invite.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Deletes an invite.</p>
+<p>Invite to delete is specified by <code class="inline">invite_code</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="delete_message/1">
+  
+  <div class="detail-header">
+    <a href="#delete_message/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">delete_message(message)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L229" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete_message(<a href="Nostrum.Struct.Message.html#t:t/0">Nostrum.Struct.Message.t</a>) :: <a href="#t:error/0">error</a> | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Delete a message.</p>
+<h2 id="delete_message/1-parameters" class="section-heading">
+  <a href="#delete_message/1-parameters" class="hover-link"><i class="icon-link"></i></a>
+  Parameters
+</h2>
+
+<ul>
+<li><code class="inline">message</code> - Message to delete.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="delete_message/2">
+  
+  <div class="detail-header">
+    <a href="#delete_message/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">delete_message(channel_id, message_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L241" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete_message(<a href="Nostrum.Struct.Guild.TextChannel.html#t:id/0">Nostrum.Struct.Guild.TextChannel.id</a>, <a href="Nostrum.Struct.Message.html#t:id/0">Nostrum.Struct.Message.id</a>) ::
+  <a href="#t:error/0">error</a> |
+  {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Delete a message.</p>
+<h2 id="delete_message/2-parameters" class="section-heading">
+  <a href="#delete_message/2-parameters" class="hover-link"><i class="icon-link"></i></a>
+  Parameters
+</h2>
+
+<ul>
+<li><code class="inline">channel_id</code> - Id of the channel the message is in.
+</li>
+<li><code class="inline">message_id</code> - Id of the message to delete.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="delete_message!/1">
+  
+  <div class="detail-header">
+    <a href="#delete_message!/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">delete_message!(message)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L253" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete_message!(<a href="Nostrum.Struct.Message.html#t:t/0">Nostrum.Struct.Message.t</a>) :: <a href="#t:error/0">error</a> | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Delete a message.</p>
+<p>See <a href="#delete_message/1"><code class="inline">delete_message/1</code></a> for usage.</p>
+<p>Raises <a href="Nostrum.Error.ApiError.html"><code class="inline">Nostrum.Error.ApiError</code></a> if error occurs while making the rest call.</p>
+
+  </section>
+</div>
+<div class="detail" id="delete_message!/2">
+  
+  <div class="detail-header">
+    <a href="#delete_message!/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">delete_message!(channel_id, message_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L266" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete_message!(<a href="Nostrum.Struct.Guild.TextChannel.html#t:id/0">Nostrum.Struct.Guild.TextChannel.id</a>, <a href="Nostrum.Struct.Message.html#t:id/0">Nostrum.Struct.Message.id</a>) ::
+  no_return |
+  {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Delete a message.</p>
+<p>See <a href="#delete_message/2"><code class="inline">delete_message/2</code></a> for usage.</p>
+<p>Raises <a href="Nostrum.Error.ApiError.html"><code class="inline">Nostrum.Error.ApiError</code></a> if error occurs while making the rest call.</p>
+
+  </section>
+</div>
+<div class="detail" id="delete_own_reaction/3">
+  
+  <div class="detail-header">
+    <a href="#delete_own_reaction/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">delete_own_reaction(channel_id, message_id, emoji)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L300" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+  </div>
+  <section class="docstring">
+    <p>Deletes a rection made by the user.</p>
+<p>Reaction to delete is specified by
+<code class="inline">channel_id</code>, <code class="inline">message_id</code>, and <code class="inline">emoji</code>.</p>
+<p>Returns <code class="inline">{:ok}</code> if successful, <code class="inline">{:error, reason}</code> otherwise.</p>
+
+  </section>
+</div>
+<div class="detail" id="delete_pinned_message/2">
+  
+  <div class="detail-header">
+    <a href="#delete_pinned_message/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">delete_pinned_message(channel_id, message_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L751" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete_pinned_message(integer, integer) :: <a href="#t:error/0">error</a> | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Unpins a message.</p>
+<p>Unpins the message specified by <code class="inline">message_id</code> in the channel specified by <code class="inline">channel_id</code>.</p>
+<p>Returns <code class="inline">{:ok}</code> if successful. <code class="inline">error</code> otherwise.</p>
+
+  </section>
+</div>
+<div class="detail" id="delete_pinned_message!/2">
+  
+  <div class="detail-header">
+    <a href="#delete_pinned_message!/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">delete_pinned_message!(channel_id, message_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L764" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete_pinned_message!(integer, integer) :: no_return | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Unpins a message.</p>
+<p>Unpins the message specified by <code class="inline">message_id</code> in the channel specified by <code class="inline">channel_id</code>.</p>
+<p>Raises <a href="Nostrum.Error.ApiError.html"><code class="inline">Nostrum.Error.ApiError</code></a> if error occurs while making the rest call.
+Returns {:ok} if successful.</p>
+
+  </section>
+</div>
+<div class="detail" id="delete_reaction/4">
+  
+  <div class="detail-header">
+    <a href="#delete_reaction/4" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">delete_reaction(channel_id, message_id, emoji, user_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L313" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete_reaction(integer, integer, <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a> | <a href="Nostrum.Struct.Emoji.html#t:custom_emoji/0">Nostrum.Struct.Emoji.custom_emoji</a>, integer) ::
+  <a href="#t:error/0">error</a> |
+  {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Deletes a rection from a message.</p>
+<p>Reaction to delete is specified by
+<code class="inline">channel_id</code>, <code class="inline">message_id</code>, <code class="inline">emoji</code>, and <code class="inline">user_id</code>.</p>
+<p>Returns <code class="inline">{:ok}</code> if successful, <code class="inline">{:error, reason}</code> otherwise.</p>
+
+  </section>
+</div>
+<div class="detail" id="delete_webhook/1">
+  
+  <div class="detail-header">
+    <a href="#delete_webhook/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">delete_webhook(webhook_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1652" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete_webhook(<a href="Nostrum.Struct.Webhook.html#t:id/0">Nostrum.Struct.Webhook.id</a>) :: <a href="#t:error/0">error</a> | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Deletes a webhook.</p>
+<h2 id="delete_webhook/1-parameters" class="section-heading">
+  <a href="#delete_webhook/1-parameters" class="hover-link"><i class="icon-link"></i></a>
+  Parameters
+</h2>
+
+<ul>
+<li><code class="inline">webhook_id</code> - Id of webhook to delete.
+</li>
+<li><code class="inline">webhook_token</code> - Token of the webhook to delete.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="edit_channel/2">
+  
+  <div class="detail-header">
+    <a href="#edit_channel/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">edit_channel(channel_id, options)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L394" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>edit_channel(integer, name: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, position: integer, topic: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, bitrate: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, user_limit: integer) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Channel.html#t:t/0">Nostrum.Struct.Channel.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Edit a channel.</p>
+<p>Edits a channel with <code class="inline">options</code></p>
+<p><code class="inline">options</code> is a kwl with the following optional keys:</p>
+<ul>
+<li><code class="inline">name</code> - New name of the channel.
+</li>
+<li><code class="inline">position</code> - Position of the channel.
+</li>
+<li><code class="inline">topic</code> - Topic of the channel. <em>Text Channels only</em>
+</li>
+<li><code class="inline">bitrate</code> - Bitrate of the voice channel. <em>Voice Channels only</em>
+</li>
+<li><code class="inline">user_limit</code> - User limit of the channel. 0 for no limit. <em>Voice Channels only</em>
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="edit_channel!/2">
+  
+  <div class="detail-header">
+    <a href="#edit_channel!/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">edit_channel!(channel_id, options)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L417" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>edit_channel!(integer, name: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, position: integer, topic: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, bitrate: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, user_limit: integer) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Channel.html#t:t/0">Nostrum.Struct.Channel.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Edit a channel.</p>
+<p>See <a href="#edit_channel/2"><code class="inline">edit_channel/2</code></a> for parameters.</p>
+<p>Raises <a href="Nostrum.Error.ApiError.html"><code class="inline">Nostrum.Error.ApiError</code></a> if error occurs while making the rest call.</p>
+
+  </section>
+</div>
+<div class="detail" id="edit_channel_permissions/3">
+  
+  <div class="detail-header">
+    <a href="#edit_channel_permissions/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">edit_channel_permissions(channel_id, overwrite_id, permission_info)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L588" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>edit_channel_permissions(integer, integer, allow: integer, deny: integer, type: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>) ::
+  <a href="#t:error/0">error</a> |
+  {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Edit the permission overwrites for a user or role.</p>
+<p>Role or user to overwrite is specified by <code class="inline">channel_id</code> and <code class="inline">overwrite_id</code>.</p>
+<p><code class="inline">permission_info</code> is a kwl with the following required keys:</p>
+<ul>
+<li><code class="inline">allow</code> - Bitwise value of allowed permissions.
+</li>
+<li><code class="inline">deny</code> - Bitwise value of denied permissions.
+</li>
+<li><code class="inline">type</code> - <code class="inline">member</code> if editing a user, <code class="inline">role</code> if editing a role.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="edit_channel_permissions!/3">
+  
+  <div class="detail-header">
+    <a href="#edit_channel_permissions!/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">edit_channel_permissions!(channel_id, overwrite_id, permission_info)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L604" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>edit_channel_permissions!(integer, integer, allow: integer, deny: integer, type: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>) ::
+  no_return |
+  {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Edit the permission overwrites for a user or role.</p>
+<p>See <code class="inline">edit_channel_permissions/2</code> for more info.</p>
+<p>Raises <a href="Nostrum.Error.ApiError.html"><code class="inline">Nostrum.Error.ApiError</code></a> if error occurs while making the rest call.</p>
+
+  </section>
+</div>
+<div class="detail" id="edit_guild/2">
+  
+  <div class="detail-header">
+    <a href="#edit_guild/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">edit_guild(guild_id, options)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L825" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>edit_guild(integer, %{name: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, region: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, verification_level: integer, default_message_notifications: boolean, afk_channel_id: integer, afk_timeout: integer, icon: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, owner_id: integer, splash: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>}) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Guild.html#t:t/0">Nostrum.Struct.Guild.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Modify a guild’s settings.</p>
+<p><code class="inline">options</code> is a map with the following optional keys:</p>
+<ul>
+<li><code class="inline">name</code> - Guild name.
+</li>
+<li><code class="inline">region</code> - Guild voice region id.
+</li>
+<li><code class="inline">verification_level</code> - Guild verification level.
+</li>
+<li><code class="inline">default_message_notifications</code> - Notifications setting.
+</li>
+<li><code class="inline">afk_channel_id</code> - Id for afk channel.
+</li>
+<li><code class="inline">afk_timeout</code> - Afk timeout in seconds.
+</li>
+<li><code class="inline">icon</code> - Base64 encoded 128x128 jpeg image for guild icon.
+</li>
+<li><code class="inline">owner_id</code> - User id to transfer guild ownership to.
+</li>
+<li><code class="inline">splash</code> - Base64 encoded 128x128 jpeg image for guild splash.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="edit_message/2">
+  
+  <div class="detail-header">
+    <a href="#edit_message/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">edit_message(message, content)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L178" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>edit_message(<a href="Nostrum.Struct.Message.html#t:t/0">Nostrum.Struct.Message.t</a>, <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Message.html#t:t/0">Nostrum.Struct.Message.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Edit a message.</p>
+<h2 id="edit_message/2-parameters" class="section-heading">
+  <a href="#edit_message/2-parameters" class="hover-link"><i class="icon-link"></i></a>
+  Parameters
+</h2>
+
+<ul>
+<li><code class="inline">message</code> - Message to edit.
+</li>
+<li><code class="inline">content</code> - New content of the message.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="edit_message/3">
+  
+  <div class="detail-header">
+    <a href="#edit_message/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">edit_message(channel_id, message_id, content)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L191" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>edit_message(<a href="Nostrum.Struct.Guild.TextChannel.html#t:id/0">Nostrum.Struct.Guild.TextChannel.id</a>, <a href="Nostrum.Struct.Message.html#t:id/0">Nostrum.Struct.Message.id</a>, <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Message.html#t:t/0">Nostrum.Struct.Message.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Edit a message.</p>
+<h2 id="edit_message/3-parameters" class="section-heading">
+  <a href="#edit_message/3-parameters" class="hover-link"><i class="icon-link"></i></a>
+  Parameters
+</h2>
+
+<ul>
+<li><code class="inline">channel_id</code> - Id of the channel the message is in.
+</li>
+<li><code class="inline">message_id</code> - Id of the message to edit.
+</li>
+<li><code class="inline">content</code> - New content of the message.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="edit_message!/2">
+  
+  <div class="detail-header">
+    <a href="#edit_message!/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">edit_message!(message, content)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L204" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>edit_message!(<a href="Nostrum.Struct.Message.html#t:t/0">Nostrum.Struct.Message.t</a>, <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Message.html#t:t/0">Nostrum.Struct.Message.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Edit a message.</p>
+<p>See <a href="#edit_message/2"><code class="inline">edit_message/2</code></a> for usage.</p>
+<p>Raises <a href="Nostrum.Error.ApiError.html"><code class="inline">Nostrum.Error.ApiError</code></a> if error occurs while making the rest call.</p>
+
+  </section>
+</div>
+<div class="detail" id="edit_message!/3">
+  
+  <div class="detail-header">
+    <a href="#edit_message!/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">edit_message!(channel_id, message_id, content)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L217" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>edit_message!(<a href="Nostrum.Struct.Guild.TextChannel.html#t:id/0">Nostrum.Struct.Guild.TextChannel.id</a>, <a href="Nostrum.Struct.Message.html#t:id/0">Nostrum.Struct.Message.id</a>, <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>) ::
+  no_return |
+  {:ok, <a href="Nostrum.Struct.Message.html#t:t/0">Nostrum.Struct.Message.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Edit a message.</p>
+<p>See <a href="#edit_message/3"><code class="inline">edit_message/3</code></a> for usage.</p>
+<p>Raises <a href="Nostrum.Error.ApiError.html"><code class="inline">Nostrum.Error.ApiError</code></a> if error occurs while making the rest call.</p>
+
+  </section>
+</div>
+<div class="detail" id="execute_git_webhook/3">
+  
+    <span id="execute_git_webhook/2" />
+  
+  <div class="detail-header">
+    <a href="#execute_git_webhook/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">execute_git_webhook(webhook_id, webhook_token, wait \\ false)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1732" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>execute_git_webhook(<a href="Nostrum.Struct.Webhook.html#t:id/0">Nostrum.Struct.Webhook.id</a>, <a href="Nostrum.Struct.Webhook.html#t:token/0">Nostrum.Struct.Webhook.token</a>, boolean) ::
+  <a href="#t:error/0">error</a> |
+  {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Executes a git webhook.</p>
+<h2 id="execute_git_webhook/3-parameters" class="section-heading">
+  <a href="#execute_git_webhook/3-parameters" class="hover-link"><i class="icon-link"></i></a>
+  Parameters
+</h2>
+
+<ul>
+<li><code class="inline">webhook_id</code> - Id of webhook to delete.
+</li>
+<li><code class="inline">webhook_token</code> - Token of the webhook to delete.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="execute_slack_webhook/3">
+  
+    <span id="execute_slack_webhook/2" />
+  
+  <div class="detail-header">
+    <a href="#execute_slack_webhook/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">execute_slack_webhook(webhook_id, webhook_token, wait \\ false)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1720" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>execute_slack_webhook(<a href="Nostrum.Struct.Webhook.html#t:id/0">Nostrum.Struct.Webhook.id</a>, <a href="Nostrum.Struct.Webhook.html#t:token/0">Nostrum.Struct.Webhook.token</a>, boolean) ::
+  <a href="#t:error/0">error</a> |
+  {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Executes a slack webhook.</p>
+<h2 id="execute_slack_webhook/3-parameters" class="section-heading">
+  <a href="#execute_slack_webhook/3-parameters" class="hover-link"><i class="icon-link"></i></a>
+  Parameters
+</h2>
+
+<ul>
+<li><code class="inline">webhook_id</code> - Id of webhook to delete.
+</li>
+<li><code class="inline">webhook_token</code> - Token of the webhook to delete.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="execute_webhook/4">
+  
+    <span id="execute_webhook/3" />
+  
+  <div class="detail-header">
+    <a href="#execute_webhook/4" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">execute_webhook(webhook_id, webhook_token, args, wait \\ false)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1681" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>execute_webhook(<a href="Nostrum.Struct.Webhook.html#t:id/0">Nostrum.Struct.Webhook.id</a>, <a href="Nostrum.Struct.Webhook.html#t:token/0">Nostrum.Struct.Webhook.token</a>, %{content: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, username: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, avatar_url: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, tts: boolean, file: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, embeds: <a href="Nostrum.Struct.Embed.html#t:t/0">Nostrum.Struct.Embed.t</a>}, boolean) ::
+  <a href="#t:error/0">error</a> |
+  {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Executes a webhook.</p>
+<h2 id="execute_webhook/4-parameters" class="section-heading">
+  <a href="#execute_webhook/4-parameters" class="hover-link"><i class="icon-link"></i></a>
+  Parameters
+</h2>
+
+<ul>
+<li><code class="inline">webhook_id</code> - Id of webhook to delete.
+</li>
+<li><code class="inline">webhook_token</code> - Token of the webhook to delete.
+</li>
+<li><p><code class="inline">args</code> - Map with the following required keys:</p>
+<ul>
+<li><code class="inline">content</code> - Message content.
+</li>
+<li><code class="inline">file</code> - File to send.
+</li>
+<li><code class="inline">embeds</code> - Embed to send.
+</li>
+<li><code class="inline">username</code> - Overrides the default name of the webhook.
+</li>
+<li><code class="inline">avatar_url</code> - Overrides the default avatar of the webhook.
+</li>
+<li><code class="inline">tts</code> - Whether the message should be read over text to speech.
+</li>
+</ul>
+</li>
+<li><code class="inline">wait</code> - Whether to return an error or not. Defaults to <code class="inline">false</code>.
+</li>
+</ul>
+<p>Only one of <code class="inline">content</code>, <code class="inline">file</code> or <code class="inline">embed</code> should be supplied in the <code class="inline">args</code> parameter.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_channel/1">
+  
+  <div class="detail-header">
+    <a href="#get_channel/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_channel(channel_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L353" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_channel(integer) :: <a href="#t:error/0">error</a> | {:ok, <a href="Nostrum.Struct.Channel.html#t:t/0">Nostrum.Struct.Channel.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Get a channel.</p>
+<p>Gets a channel specified by <code class="inline">id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_channel!/1">
+  
+  <div class="detail-header">
+    <a href="#get_channel!/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_channel!(channel_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L370" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_channel!(integer) :: no_return | <a href="Nostrum.Struct.Channel.html#t:t/0">Nostrum.Struct.Channel.t</a></pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Get a channel.</p>
+<p>Gets a channel specified by <code class="inline">id</code>.</p>
+<p>Raises <a href="Nostrum.Error.ApiError.html"><code class="inline">Nostrum.Error.ApiError</code></a> if error occurs while making the rest call.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_channel_invites/1">
+  
+  <div class="detail-header">
+    <a href="#get_channel_invites/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_channel_invites(channel_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L625" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_channel_invites(integer) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, [<a href="Nostrum.Struct.Invite.html#t:t/0">Nostrum.Struct.Invite.t</a>]}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a list of invites for a channel.</p>
+<p>Channel to get invites for is specified by <code class="inline">channel_id</code></p>
+
+  </section>
+</div>
+<div class="detail" id="get_channel_message/2">
+  
+  <div class="detail-header">
+    <a href="#get_channel_message/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_channel_message(channel_id, message_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L516" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_channel_message(integer, integer) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Message.html#t:t/0">Nostrum.Struct.Message.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Retrieves a message from a channel.</p>
+<p>Message to retrieve is specified by <code class="inline">message_id</code> and <code class="inline">channel_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_channel_message!/2">
+  
+  <div class="detail-header">
+    <a href="#get_channel_message!/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_channel_message!(channel_id, message_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L531" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_channel_message!(integer, integer) ::
+  no_return |
+  <a href="Nostrum.Struct.Message.html#t:t/0">Nostrum.Struct.Message.t</a></pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Retrieves a message from a channel.</p>
+<p>Raises <a href="Nostrum.Error.ApiError.html"><code class="inline">Nostrum.Error.ApiError</code></a> if error occurs while making the rest call.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_channel_messages/3">
+  
+    <span id="get_channel_messages/2" />
+  
+  <div class="detail-header">
+    <a href="#get_channel_messages/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_channel_messages(channel_id, limit, locator \\ {})</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L457" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_channel_messages(<a href="Nostrum.Struct.Guild.TextChannel.html#t:id/0">Nostrum.Struct.Guild.TextChannel.id</a>, <a href="#t:limit/0">limit</a>, <a href="#t:locator/0">locator</a>) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, [<a href="Nostrum.Struct.Message.html#t:t/0">Nostrum.Struct.Message.t</a>]}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Retrieve messages from a channel.</p>
+<h2 id="get_channel_messages/3-parameters" class="section-heading">
+  <a href="#get_channel_messages/3-parameters" class="hover-link"><i class="icon-link"></i></a>
+  Parameters
+</h2>
+
+<ul>
+<li><code class="inline">channel_id</code> - Id of the channel to get messages from.
+</li>
+<li><code class="inline">limit</code> - Number of messages to get.
+</li>
+<li><code class="inline">locator</code> - tuple indicating what messages you want to retrieve.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="get_channel_messages!/3">
+  
+  <div class="detail-header">
+    <a href="#get_channel_messages!/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_channel_messages!(channel_id, limit, locator)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L505" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_channel_messages!(integer, <a href="#t:limit/0">limit</a>, <a href="#t:locator/0">locator</a>) ::
+  no_return |
+  [<a href="Nostrum.Struct.Message.html#t:t/0">Nostrum.Struct.Message.t</a>]</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Retrieve messages from a channel.</p>
+<p>See <code class="inline">get_channel_message/3</code> for usage.</p>
+<p>Raises <a href="Nostrum.Error.ApiError.html"><code class="inline">Nostrum.Error.ApiError</code></a> if error occurs while making the rest call.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_channel_webhooks/1">
+  
+  <div class="detail-header">
+    <a href="#get_channel_webhooks/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_channel_webhooks(channel_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1535" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_channel_webhooks(<a href="Nostrum.Struct.Guild.TextChannel.html#t:id/0">Nostrum.Struct.Guild.TextChannel.id</a>) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, [<a href="Nostrum.Struct.Webhook.html#t:t/0">Nostrum.Struct.Webhook.t</a>]}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a list of webook for a channel.</p>
+<h2 id="get_channel_webhooks/1-parameters" class="section-heading">
+  <a href="#get_channel_webhooks/1-parameters" class="hover-link"><i class="icon-link"></i></a>
+  Parameters
+</h2>
+
+<ul>
+<li><code class="inline">channel_id</code> - Channel to get webhooks for.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="get_channels/1">
+  
+  <div class="detail-header">
+    <a href="#get_channels/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_channels(guild_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L850" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_channels(integer) :: <a href="#t:error/0">error</a> | {:ok, <a href="Nostrum.Struct.Channel.html#t:t/0">Nostrum.Struct.Channel.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a list of channels.</p>
+<p>Guild to get channels for is specified by <code class="inline">guild_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_current_user/0">
+  
+  <div class="detail-header">
+    <a href="#get_current_user/0" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_current_user()</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1375" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_current_user() :: <a href="#t:error/0">error</a> | {:ok, <a href="Nostrum.Struct.User.html#t:t/0">Nostrum.Struct.User.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets info on the current user.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_current_users_guilds/1">
+  
+  <div class="detail-header">
+    <a href="#get_current_users_guilds/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_current_users_guilds(options)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1419" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_current_users_guilds(%{before: integer, after: integer, limit: integer}) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, [<a href="Nostrum.Struct.Guild.html#t:t/0">Nostrum.Struct.Guild.t</a>]}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a list of guilds the user is currently in.</p>
+<p><code class="inline">options</code> is a map with the following optional keys:</p>
+<ul>
+<li><code class="inline">before</code> - Get guilds before this ID.
+</li>
+<li><code class="inline">after</code> - Get guilds after this ID.
+</li>
+<li><code class="inline">limit</code> - Max number of guilds to return.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="get_guild/1">
+  
+  <div class="detail-header">
+    <a href="#get_guild/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_guild(guild_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L777" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_guild(integer) :: <a href="#t:error/0">error</a> | {:ok, <a href="Nostrum.Struct.Guild.html#t:t/0">Nostrum.Struct.Guild.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a guild using the REST api</p>
+<p>Retrieves a guild with specified <code class="inline">guild_id</code>.</p>
+<p>Returns {:ok, Nostrum.Struct.Guild.t} if successful, <code class="inline">error</code> otherwise.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_guild!/1">
+  
+  <div class="detail-header">
+    <a href="#get_guild!/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_guild!(guild_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L795" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_guild!(integer) :: no_return | <a href="Nostrum.Struct.Guild.html#t:t/0">Nostrum.Struct.Guild.t</a></pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a guild using the REST api</p>
+<p>Retrieves a guild with specified <code class="inline">guild_id</code>.</p>
+<p>Raises <a href="Nostrum.Error.ApiError.html"><code class="inline">Nostrum.Error.ApiError</code></a> if error occurs while making the rest call.
+Returns <code class="inline">Nostrum.Struct.Guild.t</code> if successful.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_guild_bans/1">
+  
+  <div class="detail-header">
+    <a href="#get_guild_bans/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_guild_bans(guild_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1035" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_guild_bans(integer) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, [<a href="Nostrum.Struct.User.html#t:t/0">Nostrum.Struct.User.t</a>]}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a list of users banend from a guild.</p>
+<p>Guild to get bans for is specified by <code class="inline">guild_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_guild_embed/1">
+  
+  <div class="detail-header">
+    <a href="#get_guild_embed/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_guild_embed(guild_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1304" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_guild_embed(integer) :: <a href="#t:error/0">error</a> | {:ok, map}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a guild embed.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_guild_integrations/1">
+  
+  <div class="detail-header">
+    <a href="#get_guild_integrations/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_guild_integrations(guild_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1235" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_guild_integrations(integer) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, [<a href="Nostrum.Struct.Guild.Integration.html#t:t/0">Nostrum.Struct.Guild.Integration.t</a>]}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a list of guild integerations.</p>
+<p>Guild to get integrations for is specified by <code class="inline">guild_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_guild_invites/1">
+  
+  <div class="detail-header">
+    <a href="#get_guild_invites/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_guild_invites(guild_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1220" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_guild_invites(integer) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, [<a href="Nostrum.Struct.Invite.html#t:t/0">Nostrum.Struct.Invite.t</a>]}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a list of invites for a guild.</p>
+<p>Guilds to get voice regions for is specified by <code class="inline">guild_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_guild_members/2">
+  
+  <div class="detail-header">
+    <a href="#get_guild_members/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_guild_members(guild_id, options)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L937" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_guild_members(integer, limit: 1..1000, after: integer) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, [<a href="Nostrum.Struct.Guild.Member.html#t:t/0">Nostrum.Struct.Guild.Member.t</a>]}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a list of guild members.</p>
+<p>Guild to get members for is specified by <code class="inline">guild_id</code>.</p>
+<p><code class="inline">options</code> is a keyword list with the following optional keys:</p>
+<ul>
+<li>limit - Max number of members to return (1-1000).
+</li>
+<li>after - Highest user id of the previous page.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="get_guild_prune/2">
+  
+  <div class="detail-header">
+    <a href="#get_guild_prune/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_guild_prune(guild_id, options)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1174" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_guild_prune(integer, integer) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, %{pruned: integer}}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets the number of members that would be removed in a prune.</p>
+<p>Guild to get prune number for is specified by guild_id.
+Days is that number of days to count prune for.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_guild_roles/1">
+  
+  <div class="detail-header">
+    <a href="#get_guild_roles/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_guild_roles(guild_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1070" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_guild_roles(integer) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Guild.Role.html#t:t/0">Nostrum.Struct.Guild.Role.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a guild’s roles.</p>
+<p>Guild to get roles for is specified by <code class="inline">guild_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_guild_webhooks/1">
+  
+  <div class="detail-header">
+    <a href="#get_guild_webhooks/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_guild_webhooks(guild_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1551" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_guild_webhooks(<a href="Nostrum.Struct.Guild.html#t:id/0">Nostrum.Struct.Guild.id</a>) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, [<a href="Nostrum.Struct.Webhook.html#t:t/0">Nostrum.Struct.Webhook.t</a>]}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a list of webooks for a guild.</p>
+<h2 id="get_guild_webhooks/1-parameters" class="section-heading">
+  <a href="#get_guild_webhooks/1-parameters" class="hover-link"><i class="icon-link"></i></a>
+  Parameters
+</h2>
+
+<ul>
+<li><code class="inline">guild_id</code> - Guild to get webhooks for.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="get_invite/1">
+  
+  <div class="detail-header">
+    <a href="#get_invite/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_invite(invite_code)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1327" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_invite(integer) :: <a href="#t:error/0">error</a> | {:ok, <a href="Nostrum.Struct.Invite.html#t:t/0">Nostrum.Struct.Invite.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets an invite.</p>
+<p>Invite to get is specified by <code class="inline">invite_code</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_member/2">
+  
+  <div class="detail-header">
+    <a href="#get_member/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_member(guild_id, user_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L915" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_member(integer, integer) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Guild.Member.html#t:t/0">Nostrum.Struct.Guild.Member.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a guild member.</p>
+<p>Member to get is specified by <code class="inline">guild_id</code> and <code class="inline">user_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_pinned_messages/1">
+  
+  <div class="detail-header">
+    <a href="#get_pinned_messages/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_pinned_messages(channel_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L695" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_pinned_messages(integer) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, [<a href="Nostrum.Struct.Message.html#t:t/0">Nostrum.Struct.Message.t</a>]}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets all pinned messages.</p>
+<p>Retrieves all pinned messages for the channel specified by <code class="inline">channel_id</code>.</p>
+<p>Returns {:ok, [Message.t]} if successful. <code class="inline">error</code> otherwise.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_pinned_messages!/1">
+  
+  <div class="detail-header">
+    <a href="#get_pinned_messages!/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_pinned_messages!(channel_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L712" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_pinned_messages!(integer) ::
+  no_return |
+  [<a href="Nostrum.Struct.Message.html#t:t/0">Nostrum.Struct.Message.t</a>]</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets all pinned messages.</p>
+<p>Retrieves all pinned messages for the channel specified by <code class="inline">channel_id</code>.</p>
+<p>Returns [Message.t] if successful. <code class="inline">error</code> otherwise.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_reactions/3">
+  
+  <div class="detail-header">
+    <a href="#get_reactions/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_reactions(channel_id, message_id, emoji)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L325" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_reactions(integer, integer, <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a> | <a href="Nostrum.Struct.Emoji.html#t:custom_emoji/0">Nostrum.Struct.Emoji.custom_emoji</a>) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, [Nostrum.Struct.User]}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets all users who reacted with an emoji.</p>
+<p>Retrieves a list of users who have reacted with an emoji.</p>
+<p>Returns <code class="inline">{:ok, [Nostrum.Struct.User]}</code> if successful, <code class="inline">{:error, reason}</code> otherwise.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_token/0">
+  
+  <div class="detail-header">
+    <a href="#get_token/0" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_token()</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1787" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_token() :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a></pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Returns the token of the bot.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_user/1">
+  
+  <div class="detail-header">
+    <a href="#get_user/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_user(user_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1367" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_user(integer) :: <a href="#t:error/0">error</a> | {:ok, Nostrum.Sturct.User.t}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a user.</p>
+<p>User to get is specified by <code class="inline">user_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_user_connections/0">
+  
+  <div class="detail-header">
+    <a href="#get_user_connections/0" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_user_connections()</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1483" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_user_connections ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.User.Connection.html#t:t/0">Nostrum.Struct.User.Connection.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a list of user connections.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_user_dms/0">
+  
+  <div class="detail-header">
+    <a href="#get_user_dms/0" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_user_dms()</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1442" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_user_dms() :: <a href="#t:error/0">error</a> | {:ok, [<a href="Nostrum.Struct.DMChannel.html#t:t/0">Nostrum.Struct.DMChannel.t</a>]}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a list of user DM channels.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_voice_region/1">
+  
+  <div class="detail-header">
+    <a href="#get_voice_region/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_voice_region(guild_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1205" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_voice_region(integer) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, [<a href="Nostrum.Struct.VoiceRegion.html#t:t/0">Nostrum.Struct.VoiceRegion.t</a>]}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a list of voice regions for the guild.</p>
+<p>Guild to get voice regions for is specified by <code class="inline">guild_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="get_webhook/1">
+  
+  <div class="detail-header">
+    <a href="#get_webhook/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_webhook(webhook_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1567" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_webhook(<a href="Nostrum.Struct.Webhook.html#t:id/0">Nostrum.Struct.Webhook.id</a>) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Webhook.html#t:t/0">Nostrum.Struct.Webhook.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a webhook by id.</p>
+<h2 id="get_webhook/1-parameters" class="section-heading">
+  <a href="#get_webhook/1-parameters" class="hover-link"><i class="icon-link"></i></a>
+  Parameters
+</h2>
+
+<ul>
+<li><code class="inline">webhook_id</code> - Id of webhook to get.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="get_webhook_with_token/2">
+  
+  <div class="detail-header">
+    <a href="#get_webhook_with_token/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">get_webhook_with_token(webhook_id, webhook_token)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1587" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get_webhook_with_token(<a href="Nostrum.Struct.Webhook.html#t:id/0">Nostrum.Struct.Webhook.id</a>, <a href="Nostrum.Struct.Webhook.html#t:token/0">Nostrum.Struct.Webhook.token</a>) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Webhook.html#t:t/0">Nostrum.Struct.Webhook.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a webhook by id and token.</p>
+<p>This method is exactly like <a href="#get_webhook/1"><code class="inline">get_webhook/1</code></a> but does not require
+authentication.</p>
+<h2 id="get_webhook_with_token/2-parameters" class="section-heading">
+  <a href="#get_webhook_with_token/2-parameters" class="hover-link"><i class="icon-link"></i></a>
+  Parameters
+</h2>
+
+<ul>
+<li><code class="inline">webhook_id</code> - Id of webhook to get.
+</li>
+<li><code class="inline">webhook_token</code> - Token of the webhook to get.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="leave_guild/1">
+  
+  <div class="detail-header">
+    <a href="#leave_guild/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">leave_guild(guild_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1434" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>leave_guild(integer) :: <a href="#t:error/0">error</a> | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Leaves a guild.</p>
+<p>Guild to leave is specified by <code class="inline">guild_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="list_voice_regions/0">
+  
+  <div class="detail-header">
+    <a href="#list_voice_regions/0" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">list_voice_regions()</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1496" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>list_voice_regions ::
+  <a href="#t:error/0">error</a> |
+  {:ok, [<a href="Nostrum.Struct.VoiceRegion.html#t:t/0">Nostrum.Struct.VoiceRegion.t</a>]}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Gets a list of voice regions.</p>
+
+  </section>
+</div>
+<div class="detail" id="modify_channel_position/2">
+  
+  <div class="detail-header">
+    <a href="#modify_channel_position/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">modify_channel_position(guild_id, options)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L900" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>modify_channel_position(integer, [%{id: integer, position: integer}]) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, [Nostrum.Struct.Guild.Channel.t]}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Reorders a guild’s channels.</p>
+<p>Guild to modify channels for is specified by <code class="inline">guild_id</code>.</p>
+<p><code class="inline">options</code> is a list of maps with the following keys:</p>
+<ul>
+<li><code class="inline">id</code> - Id of the channel.
+</li>
+<li><code class="inline">position</code> - Sorting position of the channel.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="modify_current_user/1">
+  
+  <div class="detail-header">
+    <a href="#modify_current_user/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">modify_current_user(options)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1397" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+  </div>
+  <section class="docstring">
+    <p>Changes the username or avatar of the current user.</p>
+<p><strong>Example</strong></p>
+<pre><code class="Elixir">avatar = %{avatar: &quot;data:image/jpeg;base64,&quot; &lt;&gt; &quot;YXl5IGJieSB1IGx1a2luIDQgc3VtIGZ1az8=&quot;}
+{:ok, user} = Nostrum.Api.modify_current_user(avatar)</code></pre>
+<p><code class="inline">options</code> is a map with the following optional keys:</p>
+<ul>
+<li><code class="inline">username</code> - New username.
+</li>
+<li><code class="inline">avatar</code> - Base64 encoded image data, prepended with <code class="inline">data:image/jpeg;base64,</code>
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="modify_guild_embed/2">
+  
+  <div class="detail-header">
+    <a href="#modify_guild_embed/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">modify_guild_embed(guild_id, options)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1312" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>modify_guild_embed(integer, map) :: <a href="#t:error/0">error</a> | {:ok, map}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Modifies a guild imbed.</p>
+
+  </section>
+</div>
+<div class="detail" id="modify_guild_integrations/3">
+  
+  <div class="detail-header">
+    <a href="#modify_guild_integrations/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">modify_guild_integrations(guild_id, integration_id, options)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1276" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>modify_guild_integrations(integer, integer, %{expire_behaviour: integer, expire_grace_period: integer, enable_emoticons: boolean}) ::
+  <a href="#t:error/0">error</a> |
+  {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Changes the settings and behaviours for a guild integeration.</p>
+<p>Integration to modify is specified by <code class="inline">guild_id</code> and <code class="inline">integeration_id</code>.</p>
+<p><code class="inline">options</code> is a map with the following keys:</p>
+<ul>
+<li><code class="inline">expire_behavior</code> - Expiry behavior.
+</li>
+<li><code class="inline">expire_grace_period</code> - Period where the integration will ignore elapsed subs.
+</li>
+<li><code class="inline">enable_emoticons</code> - Whether emoticons should be synced.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="modify_guild_role/3">
+  
+  <div class="detail-header">
+    <a href="#modify_guild_role/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">modify_guild_role(guild_id, role_id, options)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1148" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>modify_guild_role(integer, integer, name: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, permissions: integer, color: integer, hoist: boolean, mentionable: boolean) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Guild.Role.html#t:t/0">Nostrum.Struct.Guild.Role.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Modifies a guild role.</p>
+<p>Role to modify specified by <code class="inline">guild_id</code> and <code class="inline">role_id</code>.</p>
+<p><code class="inline">options</code> is a keyword list with the following optional keys:</p>
+<ul>
+<li><code class="inline">name</code> - Name of the role.
+</li>
+<li><code class="inline">permissions</code> - Bitwise of the enabled/disabled permissions.
+</li>
+<li><code class="inline">color</code> - RGB color value.
+</li>
+<li><code class="inline">hoist</code> - Whether the role should be displayed seperately in the sidebar.
+</li>
+<li><code class="inline">mentionable</code> - Whether the role should be mentionable.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="modify_guild_role_positions/2">
+  
+  <div class="detail-header">
+    <a href="#modify_guild_role_positions/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">modify_guild_role_positions(guild_id, options)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1120" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>modify_guild_role_positions(integer, [%{id: integer, position: integer}]) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, [<a href="Nostrum.Struct.Guild.Role.html#t:t/0">Nostrum.Struct.Guild.Role.t</a>]}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Reorders a guild’s roles.</p>
+<p>Guild to modify roles for is specified by <code class="inline">guild_id</code>.</p>
+<p><code class="inline">options</code> is a list of maps with the following keys:</p>
+<ul>
+<li><code class="inline">id</code> - Id of the role.
+</li>
+<li><code class="inline">position</code> - Sorting position of the role.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="modify_member/3">
+  
+  <div class="detail-header">
+    <a href="#modify_member/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">modify_member(guild_id, user_id, options)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L993" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>modify_member(integer, integer, %{nick: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, roles: [integer], mute: boolean, deaf: boolean, channel_id: integer}) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Guild.Member.html#t:t/0">Nostrum.Struct.Guild.Member.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Modifies a guild member.</p>
+<p>Member to modify is specified by <code class="inline">guild_id</code> and <code class="inline">user_id</code></p>
+<p><code class="inline">options</code> is a map with the following option keys:</p>
+<ul>
+<li><code class="inline">nick</code> - Users nickname.
+</li>
+<li><code class="inline">roles</code> - Array of roles to give member.
+</li>
+<li><code class="inline">mute</code> - If the user should be muted.
+</li>
+<li><code class="inline">deaf</code> - If the user should be deafaned.
+</li>
+<li><code class="inline">channel_id</code> - Id of the channel to move the user to.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="modify_webhook/2">
+  
+  <div class="detail-header">
+    <a href="#modify_webhook/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">modify_webhook(webhook_id, args)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1609" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>modify_webhook(<a href="Nostrum.Struct.Webhook.html#t:id/0">Nostrum.Struct.Webhook.id</a>, %{name: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, avatar: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>}) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Webhook.html#t:t/0">Nostrum.Struct.Webhook.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Modifies a webhook.</p>
+<h2 id="modify_webhook/2-parameters" class="section-heading">
+  <a href="#modify_webhook/2-parameters" class="hover-link"><i class="icon-link"></i></a>
+  Parameters
+</h2>
+
+<ul>
+<li><code class="inline">webhook_id</code> - Id of the webhook to modify.
+</li>
+<li><p><code class="inline">args</code> - Map with the following <em>optional</em> keys:</p>
+<ul>
+<li><code class="inline">name</code> - Name of the webhook.
+</li>
+<li><code class="inline">avatar</code> - Base64 128x128 jpeg image for the default avatar.
+</li>
+</ul>
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="modify_webhook_with_token/3">
+  
+  <div class="detail-header">
+    <a href="#modify_webhook_with_token/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">modify_webhook_with_token(webhook_id, webhook_token, args)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1635" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>modify_webhook_with_token(<a href="Nostrum.Struct.Webhook.html#t:id/0">Nostrum.Struct.Webhook.id</a>, <a href="Nostrum.Struct.Webhook.html#t:token/0">Nostrum.Struct.Webhook.token</a>, %{name: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>, avatar: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>}) ::
+  <a href="#t:error/0">error</a> |
+  {:ok, <a href="Nostrum.Struct.Webhook.html#t:t/0">Nostrum.Struct.Webhook.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Modifies a webhook with a token.</p>
+<p>This method is exactly like <code class="inline">modify_webhook/1</code> but does not require
+authentication.</p>
+<h2 id="modify_webhook_with_token/3-parameters" class="section-heading">
+  <a href="#modify_webhook_with_token/3-parameters" class="hover-link"><i class="icon-link"></i></a>
+  Parameters
+</h2>
+
+<ul>
+<li><code class="inline">webhook_id</code> - Id of the webhook to modify.
+</li>
+<li><code class="inline">webhook_token</code> - Token of the webhook to get.
+</li>
+<li><p><code class="inline">args</code> - Map with the following <em>optional</em> keys:</p>
+<ul>
+<li><code class="inline">name</code> - Name of the webhook.
+</li>
+<li><code class="inline">avatar</code> - Base64 128x128 jpeg image for the default avatar.
+</li>
+</ul>
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="remove_guild_ban/2">
+  
+  <div class="detail-header">
+    <a href="#remove_guild_ban/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">remove_guild_ban(guild_id, user_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1060" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>remove_guild_ban(integer, integer) :: <a href="#t:error/0">error</a> | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Removes a ban for a user.</p>
+<p>User to unban is specified by <code class="inline">guild_id</code> and <code class="inline">user_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="remove_guild_member_role/3">
+  
+  <div class="detail-header">
+    <a href="#remove_guild_member_role/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">remove_guild_member_role(guild_id, user_id, role_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1015" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>remove_guild_member_role(integer, integer, integer) ::
+  <a href="#t:error/0">error</a> |
+  {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Removes a role from a member.</p>
+<p>Role to remove is specified by <code class="inline">role_id</code>.
+User to remove role from is specified by <code class="inline">guild_id</code> and <code class="inline">user_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="remove_member/2">
+  
+  <div class="detail-header">
+    <a href="#remove_member/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">remove_member(guild_id, user_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1025" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>remove_member(integer, integer) :: <a href="#t:error/0">error</a> | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Removes a memeber from a guild.</p>
+<p>Member to remove is specified by <code class="inline">guild_id</code> and <code class="inline">user_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="request/4">
+  
+    <span id="request/2" />
+  
+    <span id="request/3" />
+  
+  <div class="detail-header">
+    <a href="#request/4" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">request(method, route, body \\ &quot;&quot;, options \\ [])</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1748" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+  </div>
+  <section class="docstring">
+    
+  </section>
+</div>
+<div class="detail" id="request_multipart/4">
+  
+    <span id="request_multipart/2" />
+  
+    <span id="request_multipart/3" />
+  
+  <div class="detail-header">
+    <a href="#request_multipart/4" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">request_multipart(method, route, body \\ &quot;&quot;, options \\ [])</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1759" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+  </div>
+  <section class="docstring">
+    
+  </section>
+</div>
+<div class="detail" id="start_typing/1">
+  
+  <div class="detail-header">
+    <a href="#start_typing/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">start_typing(channel_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L667" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>start_typing(integer) :: <a href="#t:error/0">error</a> | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Triggers the typing indicator.</p>
+<p>Triggers the typing indicator in the channel specified by <code class="inline">channel_id</code>.
+The typing indicator lasts for about 8 seconds and then automatically stops.</p>
+<p>Returns <code class="inline">{:ok}</code> if successful. <code class="inline">error</code> otherwise.</p>
+
+  </section>
+</div>
+<div class="detail" id="start_typing!/1">
+  
+  <div class="detail-header">
+    <a href="#start_typing!/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">start_typing!(channel_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L682" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>start_typing!(integer) :: no_return | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Triggers the typing indicator.</p>
+<p>Triggers the typing indicator in the channel specified by <code class="inline">channel_id</code>.
+The typing indicator lasts for about 8 seconds and then automatically stops.</p>
+<p>Raises <a href="Nostrum.Error.ApiError.html"><code class="inline">Nostrum.Error.ApiError</code></a> if error occurs while making the rest call.
+Returns {:ok} if successful.</p>
+
+  </section>
+</div>
+<div class="detail" id="sync_guild_integrations/2">
+  
+  <div class="detail-header">
+    <a href="#sync_guild_integrations/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">sync_guild_integrations(guild_id, integration_id)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L1296" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>sync_guild_integrations(integer, integer) :: <a href="#t:error/0">error</a> | {:ok}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Syncs a guild integration.</p>
+<p>Integration to sync is specified by <code class="inline">guild_id</code> and <code class="inline">integeration_id</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="update_status/2">
+  
+  <div class="detail-header">
+    <a href="#update_status/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">update_status(status, game)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L111" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>update_status(<a href="#t:status/0">status</a>, <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>) :: no_return</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Updates the status of the bot for all shards.</p>
+<p>See <a href="#update_status/3"><code class="inline">update_status/3</code></a> for usage.</p>
+
+  </section>
+</div>
+<div class="detail" id="update_status/3">
+  
+  <div class="detail-header">
+    <a href="#update_status/3" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">update_status(pid, status, game)</span>
+    
+      <a href="https://github.com/kraigie/nostrum/blob/master/lib/nostrum/api.ex#L101" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>update_status(pid, <a href="#t:status/0">status</a>, <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>) :: no_return</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Updates the status of the bot for a certain shard.</p>
+<h2 id="update_status/3-parameters" class="section-heading">
+  <a href="#update_status/3-parameters" class="hover-link"><i class="icon-link"></i></a>
+  Parameters
+</h2>
+
+<ul>
+<li><code class="inline">pid</code> - Pid of the shard.
+</li>
+<li><code class="inline">status</code> - Status of the bot.
+</li>
+<li><code class="inline">game</code> - The ‘playing’ text of the bot. Empty will clear.
+</li>
+</ul>
+
+  </section>
+</div>
+
+        </section>
+      
+
+      
+          <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" rel="help" target="_blank">ExDoc</a> (v0.15.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+            </span>
+        </p>
+        <button class="night-mode-toggle" />
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  <script src="dist/app-372682077e.js"></script>
+  </body>
+</html>
+

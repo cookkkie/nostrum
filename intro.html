@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.15.0">
+    <title>Intro – Elixir v0.2.1</title>
+    <link rel="stylesheet" href="dist/app-a07cea761b.css" />
+    
+    <script src="dist/sidebar_items-4afea0335f.js"></script>
+  </head>
+  <body data-type="extras">
+    <script>if(localStorage.getItem('night-mode')) document.body.className += ' night-mode';</script>
+
+<div class="main">
+<button class="sidebar-toggle">
+  <i class="icon-menu"></i>
+</button>
+<section class="sidebar">
+
+  
+  <a href="intro.html" class="sidebar-projectLink">
+    <div class="sidebar-projectDetails">
+      <h1 class="sidebar-projectName">
+        Elixir
+      </h1>
+      <h2 class="sidebar-projectVersion">
+        v0.2.1
+      </h2>
+    </div>
+    
+  </a>
+
+  <div class="sidebar-search">
+    <i class="icon-search"></i>
+    <input type="text" class="sidebar-searchInput" placeholder="search" autocomplete="off" />
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+    
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+    
+
+    
+      <li><a id="exceptions-list" href="#full-list">Exceptions</a></li>
+    
+
+    
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+
+<h1>Intro</h1>
+<p>Nostrum is a an Elixir library that can be used to interact with Discord.</p>
+<p>Nostrum currently supports the latest stable version of Elixir, v. 1.4.</p>
+<p>With a platform like Discord, there are many moving parts and an attempt was made
+to break these parts into smaller logical pieces.</p>
+<p>To see documentation about a specific part of the library, please visit one of
+the following -</p>
+<ul>
+<li><a href="api.html">API</a> - Methods to interact with the RESTful API (and some other goodies).
+</li>
+<li><a href="state.html">State</a> - <code class="inline">Caches</code> that hold the state of Discord that your bot can see.
+</li>
+<li><a href="events.html">Events</a> - How you can handle real time events that your bot can see.
+</li>
+</ul>
+<h3>Why Elixir?</h3>
+<p>From the Elixir website -</p>
+<blockquote><p>Elixir is a dynamic, functional language designed for building scalable and
+maintainable applications.</p>
+</blockquote>
+<blockquote><p>Elixir leverages the Erlang VM, known for running low-latency, distributed and
+fault-tolerant systems, while also being successfully used in web development
+and the embedded software domain.</p>
+</blockquote>
+<p><strong>How does Nostrum leverage these benefits?</strong></p>
+<p><em>Fault tolerance</em> - Nostrum attempts, where reasonable, to allow for different
+parts of the application to fail with minimal harm. Supervisors are used heavily
+to ensure that anything that breaks will be restarted. Nostrum attempts to avoid
+most errors, but if they do occur (<em>and they will!</em>) it shouldn’t be the end of
+the world.</p>
+<p><em>Concurrency</em> - Concurrency is considered to be a first class citizen in Elixir.
+Through the use of SMP and processes, information should travel through the
+application quickly.</p>
+<p><em>Distributed</em> - Nostrum does not currently supported any sort of <code class="inline">Distributed</code>
+mode out of the box. By default everything is ran on the one <code class="inline">node</code> that you
+launch the application from. I’m open to suggestions as to how Nostrum could
+leverage being spread across many nodes.</p>
+<h3>Usage</h3>
+<p>There are two versions of Nostrum, a stable version released on Hex and a dev
+version on GitHub. The dev version will be more up to date but will likely
+have more errors.</p>
+<p>When choosing whether to use dev or stable, there is one important distinction
+to keep in mind. The WS lib that Nostrum uses does not support giving proper
+close codes on WS disconnects. A fork is maintained (a fork of a fork of a fork)
+that has been monkey patched to allow the proper sending of close codes.
+Unfortunately, it doesn’t seem like the original fork’s author maintains the project
+anymore. Seeing as you can’t have a package on Hex with a git dependency, the stable
+version will not have close codes until the current implementation is tested and
+released on its own, or the maintainer of the fork decides to come back to life.</p>
+<p>Add Nostrum as a dependency:</p>
+<p> <em>Dev</em></p>
+<pre><code class="Elixir">def deps do
+  [{:nostrum, git: &quot;https://github.com/Kraigie/nostrum.git&quot;}]
+end</code></pre>
+<p> <em>Stable</em></p>
+<pre><code class="Elixir">def deps do
+  [{:nostrum, &quot;~&gt; 0.1&quot;}]
+end</code></pre>
+<p>Edit or create your config file:</p>
+<p>The file should be located at <code class="inline">/config/config.exs</code>. To run Nostrum you need the
+following two fields:</p>
+<pre><code class="Elixir">config :nostrum,
+  token: 666, # The token of your bot as a string
+  num_shards: 2 # The number of shards you want to run your bot under, or :auto.</code></pre>
+<p>If you don’t know what <code class="inline">num_shards</code> is or don’t have your bot on a lot of guilds
+you can omit the field and it will default to 1. You can also set this option to
+<code class="inline">:auto</code> and Nostrum will automatically get the recommended number of shards.</p>
+<p>The following fields are also supported:</p>
+<ul>
+<li><code class="inline">self_bot</code> - Runs the bot as a self bot. If you don’t know what this is, then
+ don’t set it, or set it to <code class="inline">false</code>. Defaults to <code class="inline">false</code>.
+</li>
+<li><code class="inline">dev</code> - This is added to enable Nostrum to be run completely stand alone for
+ development purposes. <code class="inline">true</code> will cause Nostrum to spawn its own event consumers.
+ If you have the dev flag set to true while running Nostrum alongside your
+ application some of your events will be consumed. Defaults to <code class="inline">false</code>.
+</li>
+<li><code class="inline">log_full_events</code> - This will log the full payload received over the websocket.
+ This is included primarily for debugging and testing purposes. Defaults to <code class="inline">false</code>.
+</li>
+</ul>
+<p>By default, Nostrum logs a lot of data using <a href="https://hexdocs.pm/logger/Logger.html"><code class="inline">Logger</code></a>. If you want to ignore
+Logger debug data, include the following:</p>
+<pre><code class="Elixir">config :logger,
+  level: :warn</code></pre>
+<p>For more information on how this works, please see the Logger
+<a href="https://hexdocs.pm/logger/Logger.html#module-levels">documentation</a>
+Nostrum takes advantage of <code class="inline">:debug</code>, <code class="inline">:warn</code>, and <code class="inline">:info</code>.</p>
+<h3>Example Bot</h3>
+<p>A very simple example bot can be found
+<a href="https://github.com/Kraigie/nostrum/blob/a655b8bea1c96777ea6ec729493625b147899081/examples/event_consumer.ex">here</a>.</p>
+<p>A more complex bot can be found
+<a href="https://github.com/Kraigie/mark-hoff">here</a>.</p>
+
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" rel="help" target="_blank">ExDoc</a> (v0.15.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+            </span>
+        </p>
+        <button class="night-mode-toggle" />
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  <script src="dist/app-372682077e.js"></script>
+  </body>
+</html>
+
